@@ -20,8 +20,7 @@ def main():
 
         game_name = line.split(":")[0].strip()
         game_id = game_name.split(" ")[1]
-        games = line.split(":")[1].strip()
-        games = games.split(";")
+        games = line.split(":")[1].strip().split(";")
         games = [g.strip() for g in games]
         # print(game_id, games)
 
