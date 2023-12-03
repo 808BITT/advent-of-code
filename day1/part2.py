@@ -37,6 +37,7 @@ def main():
             # if char is digit, add to nums
             if char.isdigit():
                 nums.append(char)
+                word_buffer = ""
             # if char is alpha, add to word_buffer
             elif char.isalpha():
                 word_buffer += char
