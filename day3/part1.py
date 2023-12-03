@@ -47,8 +47,6 @@ for (x, y), symbol in symbol_coords.items():
             if lines[y + dy][x + dx].isdigit():
                 touch_coords[(x + dx, y + dy)] = lines[y + dy][x + dx]
 
-print(touch_coords)
-
 to_delete = []
 for (x, y), number in touch_coords.items():
     # remove items if the y are the same and the x is one apart
