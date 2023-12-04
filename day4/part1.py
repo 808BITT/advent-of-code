@@ -1,3 +1,5 @@
+import time
+start_timer = time.time()
 with open ('input.txt') as f:
     lines = f.readlines()
 
@@ -21,7 +23,7 @@ for line in lines:
     possible = [i for i in possible if i != '']
     # remove newline from last item
     possible[-1] = possible[-1][:-1]
-    print (winning, possible)
+    # print (winning, possible)
 
     for i in range(len(winning)):
         for j in range(len(possible)):
@@ -30,8 +32,8 @@ for line in lines:
 
     if matches > 0:
         points = 2 ** (matches - 1)
-        print(card, matches, points) 
+        # print(card, matches, points) 
         sum += points
 
 print(sum)
-    
+print(f"{(time.time() - start_timer) * 1000} ms")
