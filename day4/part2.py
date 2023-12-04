@@ -16,7 +16,7 @@ for l in lines:
     card = card.split(' ')[-1]
     cards[card] = 1
 
-print(cards)
+# print(cards)
 
 for card in cards:
     # pause = input()
@@ -30,18 +30,18 @@ for card in cards:
     possible = [i for i in possible if i != '']
     # remove newline from last item
     possible[-1] = possible[-1][:-1]
-    print (winning, possible)
+    # print (winning, possible)
 
     matches = 0
     for i in range(len(winning)):
         for j in range(len(possible)):
             if winning[i] == possible[j]:
                 matches += 1
-                print(f'{winning[i]} matches {possible[j]}')
+                # print(f'{winning[i]} matches {possible[j]}')
     # print(card, matches)
 
     if matches > 0:
-        print(f'Card {card}: {matches} matches, adding {cards[card]} to {matches} cards')
+        # print(f'Card {card}: {matches} matches, adding {cards[card]} to {matches} cards')
         for i in range(matches):
             # print(f'adding {cards[card]} to {str(int(card)+i+1)}')
             cards[str(int(card)+i+1)] += cards[card]
