@@ -1,3 +1,5 @@
+import time
+start_timer = time.time()
 with open ('input.txt') as f:
     lines = f.readlines()
 
@@ -54,3 +56,4 @@ for card in cards:
     sum += cards[card]
 
 print(sum)
+print(f"{(time.time() - start_timer) * 1000} ms")
