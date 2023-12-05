@@ -11,6 +11,9 @@ seed_line = lines[0].split(': ')[1].replace('\n', '').split(' ')
 
 seed_ranges = [int(s) for s in seed_line if s != '']
 for i in range(0, len(seed_ranges), 2):
+    if i % 10000 == 0 and i != 0:
+        print(f"Checked {i} seeds")
+    print(f"Checking {seed_ranges[i+1]} seeds starting at {seed_ranges[i]}")
     for seed in range(seed_ranges[i], seed_ranges[i]+seed_ranges[i+1]):
         index = 3
 
