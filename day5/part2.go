@@ -11,10 +11,71 @@ import (
 )
 
 func main() {
+	// v1()
+
+	v2()
+}
+
+func v2() {
 	currDir, _ := os.Getwd()
 	os.Chdir(currDir)
 
-	content, err := ioutil.ReadFile("input.txt")
+	content, err := ioutil.ReadFile("sample.txt")
+	if err != nil {
+		fmt.Println("Error reading input file:", err)
+		return
+	}
+
+	lines := strings.Split(string(content), "\n")
+
+	lowest := 46
+	for {
+		lowest++
+		valid := checkIfLocationIsValid(lowest, lines)
+		if valid {
+			fmt.Println("Lowest location:", lowest)
+			break
+		}
+	}
+}
+
+func checkIfLocationIsValid(location int, lines []string) bool {
+	fmt.Println("Checking location:", location)
+
+	index := len(lines) - 1
+
+	allLocations := false
+	locationToHumidity := make(map[int][2]int)
+	for !allLocations {
+		line := strings.Fields(lines[index])
+		if len(line) != 3 {
+			allLocations = true
+			index -= 2
+			break
+		}
+		l, _ := strconv.Atoi(line[0])
+		d, _ := strconv.Atoi(line[1])
+		r, _ := strconv.Atoi(line[2])
+		locationToHumidity[l] = [2]int{r, d - l}
+		index--
+	}
+	humidity := location
+	for k, v := range locationToHumidity {
+		if humidity >= k && humidity <= k+v[0] {
+			location += v[1]
+			break
+		}
+	}
+	fmt.Println("-- Humidity:", humidity)
+
+	return true
+}
+
+func v1() {
+	currDir, _ := os.Getwd()
+	os.Chdir(currDir)
+
+	content, err := ioutil.ReadFile("sample.txt")
 	if err != nil {
 		fmt.Println("Error reading input file:", err)
 		return
@@ -39,7 +100,7 @@ func main() {
 		wg.Add(1)
 		go func(seedRanges []int, i int, lines []string) {
 			defer wg.Done()
-			lowest := newFunction(seedRanges, i, lines)
+			lowest := findLowest(seedRanges, i, lines)
 			lowestList = append(lowestList, lowest)
 		}(seedRanges, i, lines)
 	}
@@ -52,9 +113,10 @@ func main() {
 			minLocation = l
 		}
 	}
+	fmt.Println("Lowest location:", minLocation)
 }
 
-func newFunction(seedRanges []int, i int, lines []string) int {
+func findLowest(seedRanges []int, i int, lines []string) int {
 	lowest := 99999999999999
 	// log.Println("Checking seed range:", seedRanges[i], "-", seedRanges[i+1]+seedRanges[i])
 	counter := 0
