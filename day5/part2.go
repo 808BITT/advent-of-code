@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -272,15 +273,7 @@ func v1() {
 		}
 	}
 
-	fmt.Println("Seed ranges:", seedRanges)
-	mathTest := 14 / 4
-	mathRemainder := 14 % 4
-	fmt.Println("Math test:", mathTest)
-	fmt.Println("Math remainder:", mathRemainder)
-	// split each seed range into 4 parts plus remainder
-	// [79 14] -> [79 3 82 3 85 3 88 3 91 2]
-	// [55 13] -> [55 3 58 3 61 3 64 3 67 1]
-	splits := 10000
+	splits := 1000
 
 	splitRanges := make([]int, 0)
 	for i := 0; i < len(seedRanges); i += 2 {
@@ -297,23 +290,36 @@ func v1() {
 	}
 
 	// print the number of seeds in each range
-	for i := 0; i < len(splitRanges); i += 2 {
-		fmt.Println("Range:", splitRanges[i], "-", splitRanges[i+1]+splitRanges[i], "has", splitRanges[i+1], "seeds")
-	}
+	// for i := 0; i < len(splitRanges); i += 2 {
+	// 	fmt.Println("Range:", splitRanges[i], "-", splitRanges[i+1]+splitRanges[i], "has", splitRanges[i+1], "seeds")
+	// }
 
 	// return
 
 	lowestList := make([]int, 0)
-
+	var counter int64 = 0
 	var wg sync.WaitGroup
+	fmt.Println("Waiting for workers to finish...")
+
+	// periodically print the number of workers still running
+	go func() {
+		for {
+			fmt.Println("Workers remaining:", atomic.LoadInt64(&counter))
+			time.Sleep(1 * time.Second)
+		}
+	}()
+
 	for i := 0; i < len(splitRanges); i += 2 {
 		wg.Add(1)
 		go func(splitRanges []int, i int, lines []string) {
+			atomic.AddInt64(&counter, 1)
 			defer wg.Done()
 			lowest := findLowest(splitRanges, i, lines)
 			lowestList = append(lowestList, lowest)
+			atomic.AddInt64(&counter, -1)
 		}(splitRanges, i, lines)
 	}
+
 	wg.Wait()
 	time.Sleep(1 * time.Second)
 
@@ -330,13 +336,13 @@ func v1() {
 func findLowest(seedRanges []int, i int, lines []string) int {
 	lowest := 99999999999999
 	// log.Println("Checking seed range:", seedRanges[i], "-", seedRanges[i+1]+seedRanges[i])
-	counter := 0
+	// counter := 0
 	for seed := seedRanges[i+1] + seedRanges[i]; seed >= seedRanges[i]; seed-- {
 		// log.Println("Checking seed:", seed)
-		counter++
-		if counter%1000 == 0 {
-			log.Println("Checked", counter, "seeds")
-		}
+		// counter++
+		// if counter%1000 == 0 {
+		// 	log.Println("Checked", counter, "seeds")
+		// }
 		index := 3
 
 		allSoils := false
