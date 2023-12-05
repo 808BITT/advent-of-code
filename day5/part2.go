@@ -13,8 +13,8 @@ import (
 )
 
 func main() {
-	// v1() // Brute force seeds
-	v2() // Brute force locations
+	v1() // Brute force seeds
+	// v2() // Brute force locations
 }
 
 func v2() {
@@ -38,9 +38,10 @@ func v2() {
 			seedRanges = append(seedRanges, num)
 		}
 	}
-	lowest := 7000000
+	lowest := 412573619
+
 	for {
-		lowest++
+		lowest--
 		valid := checkIfLocationIsValid(lowest, lines)
 		if valid {
 			fmt.Println("Lowest location:", lowest)
@@ -268,7 +269,7 @@ func v1() {
 		}
 	}
 
-	splits := 100
+	splits := 10000000
 
 	splitRanges := make([]int, 0)
 	for i := 0; i < len(seedRanges); i += 2 {
@@ -291,27 +292,26 @@ func v1() {
 
 	// return
 
-	lowestList := make([]int, 0)
+	// lowestList := make([]int, 0)
 	var counter int64 = 0
 	var globalLowest int64 = 99999999999999
 	var wg sync.WaitGroup
 	fmt.Println("Waiting for workers to finish...")
 
 	// periodically print the number of workers still running
-	go func() {
-		for {
-			fmt.Println("Workers remaining:", atomic.LoadInt64(&counter))
-			time.Sleep(1 * time.Second)
-		}
-	}()
+	// go func() {
+	// 	for {
+	// 		fmt.Println("Workers remaining:", atomic.LoadInt64(&counter))
+	// 		time.Sleep(1 * time.Second)
+	// 	}
+	// }()
 
 	for i := 0; i < len(splitRanges); i += 2 {
 		wg.Add(1)
-		go func(splitRanges []int, i int, lines []string) {
+		go func(seedRanges []int, i int, lines []string) {
 			atomic.AddInt64(&counter, 1)
 			defer wg.Done()
-			lowest := findLowest(splitRanges, i, lines, &globalLowest)
-			lowestList = append(lowestList, lowest)
+			findLowest(splitRanges, i, lines, &globalLowest)
 			atomic.AddInt64(&counter, -1)
 		}(splitRanges, i, lines)
 	}
@@ -319,18 +319,10 @@ func v1() {
 	wg.Wait()
 	time.Sleep(1 * time.Second)
 
-	// Print the lowest location
-	minLocation := 99999999999999
-	for _, l := range lowestList {
-		if l < minLocation {
-			minLocation = l
-		}
-	}
-	fmt.Println("Lowest location:", minLocation)
+	fmt.Println("Lowest location:", globalLowest)
 }
 
-func findLowest(seedRanges []int, i int, lines []string, globalLowest *int64) int {
-	lowest := 99999999999999
+func findLowest(seedRanges []int, i int, lines []string, globalLowest *int64) {
 	// log.Println("Checking seed range:", seedRanges[i], "-", seedRanges[i+1]+seedRanges[i])
 	// counter := 0
 	for seed := seedRanges[i]; seed <= seedRanges[i]+seedRanges[i+1]; seed++ {
@@ -501,5 +493,4 @@ func findLowest(seedRanges []int, i int, lines []string, globalLowest *int64) in
 			log.Println("New lowest location:", location)
 		}
 	}
-	return lowest
 }
