@@ -8,12 +8,12 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 func main() {
-	// v1()
-
-	v2()
+	v1() // Brute force seeds
+	// v2() // Brute force locations
 }
 
 func v2() {
@@ -28,7 +28,21 @@ func v2() {
 
 	lines := strings.Split(string(content), "\n")
 
-	lowest := 46
+	seeds := strings.Split(lines[0], ": ")[1]
+	seedLine := strings.Fields(seeds)
+	seedRanges := make([]int, 0)
+	for _, s := range seedLine {
+		if s != "" {
+			num, _ := strconv.Atoi(s)
+			seedRanges = append(seedRanges, num)
+		}
+	}
+	lowest := 100000000
+	for i := 0; i < len(seedRanges); i += 2 {
+		if seedRanges[i] < lowest {
+			lowest = seedRanges[i] / 10
+		}
+	}
 	for {
 		lowest++
 		valid := checkIfLocationIsValid(lowest, lines)
@@ -40,7 +54,9 @@ func v2() {
 }
 
 func checkIfLocationIsValid(location int, lines []string) bool {
-	fmt.Println("Checking location:", location)
+	if location%10000 == 0 {
+		log.Println("Processed", location, "locations")
+	}
 
 	index := len(lines) - 1
 
@@ -66,16 +82,179 @@ func checkIfLocationIsValid(location int, lines []string) bool {
 			break
 		}
 	}
-	fmt.Println("-- Humidity:", humidity)
+	// fmt.Println("-- Humidity:", humidity)
 
-	return true
+	allHumidities := false
+	humidityToTemperature := make(map[int][2]int)
+	for !allHumidities {
+		line := strings.Fields(lines[index])
+		if len(line) != 3 {
+			allHumidities = true
+			index -= 2
+			break
+		}
+		h, _ := strconv.Atoi(line[0])
+		d, _ := strconv.Atoi(line[1])
+		r, _ := strconv.Atoi(line[2])
+		humidityToTemperature[h] = [2]int{r, d - h}
+		index--
+	}
+	temperature := humidity
+	for k, v := range humidityToTemperature {
+		if humidity >= k && humidity <= k+v[0] {
+			temperature += v[1]
+			break
+		}
+	}
+	// fmt.Println("-- Temperature:", temperature)
+
+	allTemperatures := false
+	temperatureToLight := make(map[int][2]int)
+	for !allTemperatures {
+		line := strings.Fields(lines[index])
+		if len(line) != 3 {
+			allTemperatures = true
+			index -= 2
+			break
+		}
+		t, _ := strconv.Atoi(line[0])
+		d, _ := strconv.Atoi(line[1])
+		r, _ := strconv.Atoi(line[2])
+		temperatureToLight[t] = [2]int{r, d - t}
+		index--
+	}
+	light := temperature
+	for k, v := range temperatureToLight {
+		if temperature >= k && temperature <= k+v[0] {
+			light += v[1]
+			break
+		}
+	}
+	// fmt.Println("-- Light:", light)
+
+	allLights := false
+	lightToWater := make(map[int][2]int)
+	for !allLights {
+		line := strings.Fields(lines[index])
+		if len(line) != 3 {
+			allLights = true
+			index -= 2
+			break
+		}
+		l, _ := strconv.Atoi(line[0])
+		d, _ := strconv.Atoi(line[1])
+		r, _ := strconv.Atoi(line[2])
+		lightToWater[l] = [2]int{r, d - l}
+		index--
+	}
+	water := light
+	for k, v := range lightToWater {
+		if light >= k && light <= k+v[0] {
+			water += v[1]
+			break
+		}
+	}
+	// fmt.Println("-- Water:", water)
+
+	allWaters := false
+	waterToFertilizer := make(map[int][2]int)
+	for !allWaters {
+		line := strings.Fields(lines[index])
+		if len(line) != 3 {
+			allWaters = true
+			index -= 2
+			break
+		}
+		w, _ := strconv.Atoi(line[0])
+		d, _ := strconv.Atoi(line[1])
+		r, _ := strconv.Atoi(line[2])
+		waterToFertilizer[w] = [2]int{r, d - w}
+		index--
+	}
+	fertilizer := water
+	for k, v := range waterToFertilizer {
+		if water >= k && water <= k+v[0] {
+			fertilizer += v[1]
+			break
+		}
+	}
+	// fmt.Println("-- Fertilizer:", fertilizer)
+
+	allFertilizers := false
+	fertilizerToSoil := make(map[int][2]int)
+	for !allFertilizers {
+		line := strings.Fields(lines[index])
+		if len(line) != 3 {
+			allFertilizers = true
+			index -= 2
+			break
+		}
+		f, _ := strconv.Atoi(line[0])
+		d, _ := strconv.Atoi(line[1])
+		r, _ := strconv.Atoi(line[2])
+		fertilizerToSoil[f] = [2]int{r, d - f}
+		index--
+	}
+	soil := fertilizer
+	for k, v := range fertilizerToSoil {
+		if fertilizer >= k && fertilizer <= k+v[0] {
+			soil += v[1]
+			break
+		}
+	}
+	// fmt.Println("-- Soil:", soil)
+
+	allSoils := false
+	soilToSeed := make(map[int][2]int)
+	for !allSoils {
+		line := strings.Fields(lines[index])
+		if len(line) != 3 {
+			allSoils = true
+			index -= 2
+			break
+		}
+		s, _ := strconv.Atoi(line[0])
+		d, _ := strconv.Atoi(line[1])
+		r, _ := strconv.Atoi(line[2])
+		soilToSeed[s] = [2]int{r, d - s}
+		index--
+	}
+	seed := soil
+	for k, v := range soilToSeed {
+		if soil >= k && soil <= k+v[0] {
+			seed += v[1]
+			break
+		}
+	}
+	// fmt.Println("-- Seed:", seed)
+
+	// check if seed is in one of the seed ranges
+	seeds := strings.Split(lines[0], ": ")[1]
+	seedLine := strings.Fields(seeds)
+	seedRanges := make([]int, 0)
+	for _, s := range seedLine {
+		if s != "" {
+			num, _ := strconv.Atoi(s)
+			seedRanges = append(seedRanges, num)
+		}
+	}
+
+	for i := 0; i < len(seedRanges); i += 2 {
+		if seed >= seedRanges[i] && seed <= seedRanges[i+1]+seedRanges[i] {
+			fmt.Println("-- Seed is in range:", seedRanges[i], "-", seedRanges[i+1]+seedRanges[i])
+			return true
+		}
+	}
+
+	// fmt.Println("-- Seed is not in range")
+	return false
 }
 
 func v1() {
 	currDir, _ := os.Getwd()
 	os.Chdir(currDir)
 
-	content, err := ioutil.ReadFile("sample.txt")
+	content, err := ioutil.ReadFile("input.txt")
 	if err != nil {
 		fmt.Println("Error reading input file:", err)
 		return
@@ -93,18 +272,47 @@ func v1() {
 		}
 	}
 
+	fmt.Println("Seed ranges:", seedRanges)
+	mathTest := 14 / 4
+	mathRemainder := 14 % 4
+	fmt.Println("Math test:", mathTest)
+	fmt.Println("Math remainder:", mathRemainder)
+	// split each seed range into 4 parts plus remainder
+	// [79 14] -> [79 3 82 3 85 3 88 3 91 2]
+	// [55 13] -> [55 3 58 3 61 3 64 3 67 1]
+	splits := 10
+
+	splitRanges := make([]int, 0)
+	for i := 0; i < len(seedRanges); i += 2 {
+		inc := seedRanges[i+1] / splits
+		rem := seedRanges[i+1] % splits
+		splitRanges = append(splitRanges, seedRanges[i])
+		splitRanges = append(splitRanges, inc)
+		for j := 0; j < splits-1; j++ {
+			splitRanges = append(splitRanges, seedRanges[i]+inc*(j+1))
+			splitRanges = append(splitRanges, inc)
+		}
+		splitRanges = append(splitRanges, seedRanges[i]+inc*splits)
+		splitRanges = append(splitRanges, rem)
+	}
+
+	fmt.Println("Split ranges:", splitRanges)
+
+	// return
+
 	lowestList := make([]int, 0)
 
 	var wg sync.WaitGroup
-	for i := 0; i < len(seedRanges); i += 2 {
+	for i := 0; i < len(splitRanges); i += 2 {
 		wg.Add(1)
-		go func(seedRanges []int, i int, lines []string) {
+		go func(splitRanges []int, i int, lines []string) {
 			defer wg.Done()
-			lowest := findLowest(seedRanges, i, lines)
+			lowest := findLowest(splitRanges, i, lines)
 			lowestList = append(lowestList, lowest)
-		}(seedRanges, i, lines)
+		}(splitRanges, i, lines)
 	}
 	wg.Wait()
+	time.Sleep(1 * time.Second)
 
 	// Print the lowest location
 	minLocation := 99999999999999
@@ -120,7 +328,7 @@ func findLowest(seedRanges []int, i int, lines []string) int {
 	lowest := 99999999999999
 	// log.Println("Checking seed range:", seedRanges[i], "-", seedRanges[i+1]+seedRanges[i])
 	counter := 0
-	for seed := seedRanges[i]; seed <= seedRanges[i+1]+seedRanges[i]; seed++ {
+	for seed := seedRanges[i+1] + seedRanges[i]; seed >= seedRanges[i]; seed-- {
 		// log.Println("Checking seed:", seed)
 		counter++
 		if counter%10000 == 0 {
