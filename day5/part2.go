@@ -38,9 +38,9 @@ func v2() {
 			seedRanges = append(seedRanges, num)
 		}
 	}
-	lowest := 28601906
+	lowest := 7000000
 	for {
-		lowest--
+		lowest++
 		valid := checkIfLocationIsValid(lowest, lines)
 		if valid {
 			fmt.Println("Lowest location:", lowest)
