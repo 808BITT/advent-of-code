@@ -280,7 +280,7 @@ func v1() {
 	// split each seed range into 4 parts plus remainder
 	// [79 14] -> [79 3 82 3 85 3 88 3 91 2]
 	// [55 13] -> [55 3 58 3 61 3 64 3 67 1]
-	splits := 10
+	splits := 10000
 
 	splitRanges := make([]int, 0)
 	for i := 0; i < len(seedRanges); i += 2 {
@@ -296,7 +296,10 @@ func v1() {
 		splitRanges = append(splitRanges, rem)
 	}
 
-	fmt.Println("Split ranges:", splitRanges)
+	// print the number of seeds in each range
+	for i := 0; i < len(splitRanges); i += 2 {
+		fmt.Println("Range:", splitRanges[i], "-", splitRanges[i+1]+splitRanges[i], "has", splitRanges[i+1], "seeds")
+	}
 
 	// return
 
@@ -331,7 +334,7 @@ func findLowest(seedRanges []int, i int, lines []string) int {
 	for seed := seedRanges[i+1] + seedRanges[i]; seed >= seedRanges[i]; seed-- {
 		// log.Println("Checking seed:", seed)
 		counter++
-		if counter%10000 == 0 {
+		if counter%1000 == 0 {
 			log.Println("Checked", counter, "seeds")
 		}
 		index := 3
