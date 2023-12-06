@@ -13,11 +13,6 @@ import (
 )
 
 func main() {
-	v1() // Brute force seeds
-	// v2() // Brute force locations
-}
-
-func v2() {
 	currDir, _ := os.Getwd()
 	os.Chdir(currDir)
 
@@ -38,23 +33,40 @@ func v2() {
 			seedRanges = append(seedRanges, num)
 		}
 	}
-	lowest := 412573619
 
+	v2(lines, seedRanges) // Brute force locations
+	// v1(lines, seedRanges) // Brute force seeds .... LOL
+}
+
+func v2(lines []string, seedRanges []int) {
+	lowest := 99999999
+	index := lowest
 	for {
-		lowest--
-		valid := checkIfLocationIsValid(lowest, lines)
-		if valid {
-			fmt.Println("Lowest location:", lowest)
+		index -= 1000
+		if index < 0 {
+			index = lowest + 1
 			break
 		}
+		valid := checkIfLocationIsValid(index, lines)
+		if valid {
+			lowest = index
+		}
+		fmt.Println("Lowest:", lowest, "Index:", index)
+	}
+	for {
+		index -= 1
+		if index < 0 {
+			break
+		}
+		valid := checkIfLocationIsValid(index, lines)
+		if valid {
+			lowest = index
+		}
+		fmt.Println("Lowest:", lowest, "Index:", index)
 	}
 }
 
 func checkIfLocationIsValid(location int, lines []string) bool {
-	if location%10000 == 0 {
-		log.Println("Processed", location, "locations")
-	}
-
 	index := len(lines) - 1
 
 	allLocations := false
@@ -75,7 +87,7 @@ func checkIfLocationIsValid(location int, lines []string) bool {
 	humidity := location
 	for k, v := range locationToHumidity {
 		if humidity >= k && humidity <= k+v[0] {
-			location += v[1]
+			humidity += v[1]
 			break
 		}
 	}
@@ -238,7 +250,7 @@ func checkIfLocationIsValid(location int, lines []string) bool {
 
 	for i := 0; i < len(seedRanges); i += 2 {
 		if seed >= seedRanges[i] && seed <= seedRanges[i+1]+seedRanges[i] {
-			fmt.Println("-- Seed is in range:", seedRanges[i], "-", seedRanges[i+1]+seedRanges[i])
+			// fmt.Println("-- Seed is in range:", seedRanges[i], "-", seedRanges[i+1]+seedRanges[i])
 			return true
 		}
 	}
@@ -247,28 +259,7 @@ func checkIfLocationIsValid(location int, lines []string) bool {
 	return false
 }
 
-func v1() {
-	currDir, _ := os.Getwd()
-	os.Chdir(currDir)
-
-	content, err := ioutil.ReadFile("input.txt")
-	if err != nil {
-		fmt.Println("Error reading input file:", err)
-		return
-	}
-
-	lines := strings.Split(string(content), "\n")
-
-	seeds := strings.Split(lines[0], ": ")[1]
-	seedLine := strings.Fields(seeds)
-	seedRanges := make([]int, 0)
-	for _, s := range seedLine {
-		if s != "" {
-			num, _ := strconv.Atoi(s)
-			seedRanges = append(seedRanges, num)
-		}
-	}
-
+func v1(lines []string, seedRanges []int) {
 	splits := 10000000
 
 	splitRanges := make([]int, 0)
@@ -294,7 +285,7 @@ func v1() {
 
 	// lowestList := make([]int, 0)
 	var counter int64 = 0
-	var globalLowest int64 = 99999999999999
+	var globalLowest int64 = 1500948298
 	var wg sync.WaitGroup
 	fmt.Println("Waiting for workers to finish...")
 
