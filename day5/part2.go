@@ -39,10 +39,10 @@ func main() {
 }
 
 func v2(lines []string, seedRanges []int) {
-	lowest := 99999999
+	lowest := 999999999
 	index := lowest
 	for {
-		index -= 1000
+		index -= 100000
 		if index < 0 {
 			index = lowest + 1
 			break
@@ -53,14 +53,23 @@ func v2(lines []string, seedRanges []int) {
 		}
 		fmt.Println("Lowest:", lowest, "Index:", index)
 	}
+	multiplier := 1
+	streak := 0
 	for {
-		index -= 1
+		index -= multiplier
 		if index < 0 {
 			break
 		}
 		valid := checkIfLocationIsValid(index, lines)
 		if valid {
 			lowest = index
+			streak = 0
+			multiplier = 1
+		} else {
+			streak++
+			if streak > 1000 && multiplier < 50000 {
+				multiplier += 1
+			}
 		}
 		fmt.Println("Lowest:", lowest, "Index:", index)
 	}
