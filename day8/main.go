@@ -114,20 +114,11 @@ func part2V2(input []string) int {
 
 	ghostLocations, _, moveMap := generateMoveMapP2(input)
 
-	endMap := make(map[string]bool)
-	for i := 0; i < len(ghostLocations); i++ {
-		endMap[ghostLocations[i]] = false
-	}
-
-	movesPerGhost := make(map[string]int)
+	movesPerGhost := make(MovesPerGhost)
 	for i := 0; i < len(ghostLocations); i++ {
 		movesPerGhost[ghostLocations[i]] = 0
 	}
 
-	initalLocations := make(map[string]string)
-	for i := 0; i < len(ghostLocations); i++ {
-		initalLocations[ghostLocations[i]] = ghostLocations[i]
-	}
 	// find how many moves it takes each ghost to get back to its end point
 	for i := 0; i < len(ghostLocations); i++ {
 		found := false
@@ -161,13 +152,13 @@ func part2V2(input []string) int {
 	return findIntersection(movesPerGhost)
 }
 
-func findIntersection(movesPerGhost map[string]int) int {
+func findIntersection(m MovesPerGhost) int {
 	var moves []int
-	for _, value := range movesPerGhost {
+	for _, value := range m {
 		moves = append(moves, value)
 	}
 	lcm := moves[0]
-	for i := 1; i < len(movesPerGhost); i++ {
+	for i := 1; i < len(m); i++ {
 		lcm = findLCM(lcm, moves[i])
 	}
 	return lcm
@@ -234,3 +225,5 @@ type Mapping struct {
 	Left  string
 	Right string
 }
+
+type MovesPerGhost map[string]int
