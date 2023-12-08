@@ -29,17 +29,16 @@ func readInput(filename string) []string {
 
 func part1(input []string) int {
 	moveSequence := convertMoves(input[0])
-	fmt.Println(moveSequence)
+	// fmt.Println(moveSequence)
 
 	currentLocation, moveMap := generateMoveMap(input)
-	fmt.Println(moveMap)
-	fmt.Println(currentLocation)
+	// fmt.Println(moveMap)
+	// fmt.Println(currentLocation)
 
 	moves := 0
 	for {
 		fmt.Println(currentLocation)
-		fmt.Println(moveMap[currentLocation].Left, moveMap[currentLocation].Right)
-		fmt.Scanln()
+		// fmt.Println(moveMap[currentLocation].Left, moveMap[currentLocation].Right)
 		for i := 0; i < len(moveSequence); i++ {
 			if moveSequence[i] == 0 {
 				currentLocation = moveMap[currentLocation].Left
@@ -71,18 +70,18 @@ func convertMoves(input string) []int {
 }
 
 func generateMoveMap(input []string) (string, map[string]Mapping) {
-	var startLocation string
+	// var startLocations []string
 	moveMap := make(map[string]Mapping)
 	for i := 2; i < len(input); i++ {
 		re := regexp.MustCompile(`(\w+) = \((\w+), (\w+)\)`) // Updated regex pattern
 		matches := re.FindStringSubmatch(input[i])
-		fmt.Println(matches[1], matches[2], matches[3])
+		// fmt.Println(matches[1], matches[2], matches[3])
 		moveMap[matches[1]] = Mapping{matches[2], matches[3]}
-		if i == 2 {
-			startLocation = matches[1]
-		}
+		// if i == 2 {
+		// 	startLocation = matches[1]
+		// }
 	}
-	return startLocation, moveMap
+	return "AAA", moveMap
 }
 
 type Mapping struct {
