@@ -10,7 +10,7 @@ import (
 
 func main() {
 	timer := time.Now()
-	fmt.Println("Part 1 Solution:", part1("sample.txt"))
+	fmt.Println("Part 1 Solution:", part1("input.txt"))
 	fmt.Println("Time taken:", time.Since(timer))
 	// timer = time.Now()
 	// fmt.Println("Part 2 Solution:", part2("input.txt"))
@@ -35,8 +35,8 @@ type Pipe struct {
 type PipeMapping map[string]Pipe
 
 func part1(filename string) int {
-	north := Direction{"North", 0, 1}
-	south := Direction{"South", 0, -1}
+	north := Direction{"North", 0, -1}
+	south := Direction{"South", 0, 1}
 	east := Direction{"East", 1, 0}
 	west := Direction{"West", -1, 0}
 
@@ -47,7 +47,7 @@ func part1(filename string) int {
 	lookup["J"] = Pipe{[]Direction{north, west}}
 	lookup["7"] = Pipe{[]Direction{south, west}}
 	lookup["F"] = Pipe{[]Direction{south, east}}
-	lookup["S"] = Pipe{[]Direction{north, east, south, west}}
+	lookup["S"] = Pipe{[]Direction{south, east, north, west}}
 
 	lines := readFile(filename)
 	pipeMap, startX, startY := generateMap(lines)
@@ -66,30 +66,33 @@ func part1(filename string) int {
 	visited := []Position{{currentX, currentY}}
 	steps := 0
 	for !backToStart {
-		fmt.Scanln()
+		// fmt.Scanln()
 		current := pipeMap[currentY][currentX]
-		fmt.Println("Current Position:", current, currentX, currentY)
+		// fmt.Println("Current Position:", current, currentX, currentY)
 		for _, direction := range lookup[current].connections {
-			fmt.Println("Checking direction:", direction)
+			// fmt.Println("Checking direction:", direction.name)
 
 			new := pipeMap[currentY+direction.dy][currentX+direction.dx]
-			fmt.Println("-- Checking Position:", new, currentX+direction.dx, currentY+direction.dy)
+			// fmt.Println("-- Found Character:", new)
 
 			pipeFound := false
 			for p, _ := range lookup {
 				if new == p && !contains(visited, Position{currentX + direction.dx, currentY + direction.dy}) {
-					fmt.Println("-- Found new pipe:", Position{currentX + direction.dx, currentY + direction.dy})
+					// fmt.Println("-- Found new pipe:", Position{currentX + direction.dx, currentY + direction.dy})
 					visited = append(visited, Position{currentX + direction.dx, currentY + direction.dy})
 					pipeFound = true
 					currentX += direction.dx
 					currentY += direction.dy
 					break
-				} else if new == p {
-					fmt.Println("-- Already visited pipe:", Position{currentX + direction.dx, currentY + direction.dy})
+				} else if new == "S" && steps > 1 {
+					// fmt.Println("-- Found start:", Position{currentX + direction.dx, currentY + direction.dy})
+					pipeFound = true
+					backToStart = true
+					break
 				}
 			}
 			if pipeFound {
-				fmt.Println("Moving to new pipe:", Position{currentX, currentY})
+				// fmt.Println("Moving to new pipe:", Position{currentX, currentY})
 				steps++
 				break
 			}
