@@ -180,16 +180,17 @@ func part2(filename string) int {
 					break
 				}
 			}
-			if pipeCount%2 == 0 && temp > 0 {
-				fmt.Println("Adding temp:", temp)
+			if pipeCount%2 == 0 {
 				count += temp
 				temp = 0
 			}
 			if pipe {
 				continue
 			}
-			if string(char) == "." && pipeCount%2 == 1 && y > 0 && y < len(lines)-1 && x > 0 && x < len(line)-1 {
+
+			if pipeCount%2 == 1 && !contains(visited, Position{x, y}) && pipeCount%2 == 1 && y > 0 && y < len(lines)-1 && x > 0 && x < len(line)-1 {
 				temp++
+				fmt.Println("Incrementing temp:", temp, Position{x, y})
 			}
 		}
 		fmt.Println(count)
