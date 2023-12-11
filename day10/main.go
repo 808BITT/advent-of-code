@@ -17,23 +17,6 @@ func main() {
 	fmt.Println("Time taken:", time.Since(timer))
 }
 
-type Position struct {
-	x int
-	y int
-}
-
-type Direction struct {
-	name string
-	dx   int
-	dy   int
-}
-
-type Pipe struct {
-	connections []Direction
-}
-
-type PipeMapping map[string]Pipe
-
 func part1(filename string) int {
 	north := Direction{"North", 0, -1}
 	south := Direction{"South", 0, 1}
@@ -118,13 +101,6 @@ func part2(filename string) int {
 
 	lines := readFile(filename)
 	pipeMap, startX, startY := generateMap(lines)
-	// fmt.Println(pipeMap)
-	// fmt.Println(startX, startY)
-
-	// start at S
-	// check all directions
-	// if there is a pipe, move to that pipe and add 1 to the counter
-	// if we get back to S, stop
 
 	currentX := startX
 	currentY := startY
@@ -133,69 +109,68 @@ func part2(filename string) int {
 	visited := []Position{{currentX, currentY}}
 	steps := 0
 	for !backToStart {
-		// fmt.Scanln()
 		current := pipeMap[currentY][currentX]
-		// fmt.Println("Current Position:", current, currentX, currentY)
 		for _, direction := range lookup[current].connections {
-			// fmt.Println("Checking direction:", direction.name)
-
 			new := pipeMap[currentY+direction.dy][currentX+direction.dx]
-			// fmt.Println("-- Found Character:", new)
-
 			pipeFound := false
 			for p, _ := range lookup {
 				if new == p && !contains(visited, Position{currentX + direction.dx, currentY + direction.dy}) {
-					// fmt.Println("-- Found new pipe:", Position{currentX + direction.dx, currentY + direction.dy})
 					visited = append(visited, Position{currentX + direction.dx, currentY + direction.dy})
 					pipeFound = true
 					currentX += direction.dx
 					currentY += direction.dy
 					break
 				} else if new == "S" && steps > 1 {
-					// fmt.Println("-- Found start:", Position{currentX + direction.dx, currentY + direction.dy})
 					pipeFound = true
 					backToStart = true
 					break
 				}
 			}
 			if pipeFound {
-				// fmt.Println("Moving to new pipe:", Position{currentX, currentY})
 				steps++
 				break
 			}
 		}
 	}
 
-	count := 0
-	for y, line := range lines {
-		pipeCount := 0
-		fmt.Println(line)
-		temp := 0
-		for x, char := range line {
-			pipe := false
-			for p, _ := range lookup { // check if it's a pipe
-				if string(char) == p && contains(visited, Position{x, y}) {
-					pipeCount++
-					pipe = true
-					break
-				}
-			}
-			if pipeCount%2 == 0 {
-				count += temp
-				temp = 0
-			}
-			if pipe {
-				continue
-			}
+	// Initialize visited map for flood fill
+	visitedMap := make(VisitedMap)
 
-			if pipeCount%2 == 1 && !contains(visited, Position{x, y}) && pipeCount%2 == 1 && y > 0 && y < len(lines)-1 && x > 0 && x < len(line)-1 {
-				temp++
-				fmt.Println("Incrementing temp:", temp, Position{x, y})
+	// Perform flood fill from the borders of the grid
+	for x := 0; x < len(pipeMap[0]); x++ {
+		floodFill(pipeMap, x, 0, visitedMap)              // Top border
+		floodFill(pipeMap, x, len(pipeMap)-1, visitedMap) // Bottom border
+	}
+	for y := 0; y < len(pipeMap); y++ {
+		floodFill(pipeMap, 0, y, visitedMap)                 // Left border
+		floodFill(pipeMap, len(pipeMap[0])-1, y, visitedMap) // Right border
+	}
+
+	// Count unvisited cells as enclosed areas
+	enclosedCount := 0
+	for y, row := range pipeMap {
+		for x := range row {
+			if !visitedMap[Position{x, y}] {
+				log.Println(Position{x, y}, visitedMap[Position{x, y}])
+				enclosedCount++
 			}
 		}
-		fmt.Println(count)
 	}
-	return count
+
+	return enclosedCount
+}
+
+func floodFill(grid Grid, x, y int, visited VisitedMap) {
+	log.Println("Count of visited cells:", len(visited))
+	if x < 0 || x >= len(grid[0]) || y < 0 || y >= len(grid) || visited[Position{x, y}] {
+		return
+	}
+	visited[Position{x, y}] = true
+
+	directions := []Direction{{"North", 0, -1}, {"South", 0, 1}, {"East", 1, 0}, {"West", -1, 0}}
+	for _, d := range directions {
+		floodFill(grid, x+d.dx, y+d.dy, visited)
+	}
 }
 
 func contains(list []Position, item Position) bool {
@@ -242,3 +217,22 @@ func generateMap(lines []string) (Grid, int, int) {
 
 // need a 2D char array to store the grid
 type Grid [][]string
+
+type Position struct {
+	x int
+	y int
+}
+
+type Direction struct {
+	name string
+	dx   int
+	dy   int
+}
+
+type Pipe struct {
+	connections []Direction
+}
+
+type PipeMapping map[string]Pipe
+
+type VisitedMap map[Position]bool
