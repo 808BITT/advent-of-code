@@ -10,10 +10,10 @@ import (
 
 func main() {
 	timer := time.Now()
-	fmt.Println("Part 1 Solution:", part1("input.txt"))
+	fmt.Println("Part 1 Solution:", part1("sample.txt"))
 	fmt.Println("Time taken:", time.Since(timer))
 	timer = time.Now()
-	fmt.Println("Part 2 Solution:", part2("sample.txt"))
+	fmt.Println("Part 2 Solution:", part2("input.txt"))
 	fmt.Println("Time taken:", time.Since(timer))
 }
 
@@ -133,44 +133,51 @@ func part2(filename string) int {
 		}
 	}
 
-	// Initialize visited map for flood fill
-	visitedMap := make(VisitedMap)
-
-	// Perform flood fill from the borders of the grid
-	for x := 0; x < len(pipeMap[0]); x++ {
-		floodFill(pipeMap, x, 0, visitedMap)              // Top border
-		floodFill(pipeMap, x, len(pipeMap)-1, visitedMap) // Bottom border
-	}
-	for y := 0; y < len(pipeMap); y++ {
-		floodFill(pipeMap, 0, y, visitedMap)                 // Left border
-		floodFill(pipeMap, len(pipeMap[0])-1, y, visitedMap) // Right border
-	}
-
-	// Count unvisited cells as enclosed areas
-	enclosedCount := 0
-	for y, row := range pipeMap {
-		for x := range row {
-			if !visitedMap[Position{x, y}] {
-				log.Println(Position{x, y}, visitedMap[Position{x, y}])
-				enclosedCount++
+	// create a new grid where non-visited cells are now "."
+	newGrid := make(Grid, len(pipeMap))
+	for i := range newGrid {
+		newGrid[i] = make([]string, len(pipeMap[i]))
+		for j := range newGrid[i] {
+			if contains(visited, Position{j, i}) {
+				newGrid[i][j] = pipeMap[i][j]
+			} else {
+				newGrid[i][j] = "."
 			}
 		}
 	}
 
-	return enclosedCount
-}
-
-func floodFill(grid Grid, x, y int, visited VisitedMap) {
-	log.Println("Count of visited cells:", len(visited))
-	if x < 0 || x >= len(grid[0]) || y < 0 || y >= len(grid) || visited[Position{x, y}] {
-		return
+	enclosed := 0
+	for i, _ := range newGrid {
+		inside := false
+		partialPipe := false
+		for _, char := range newGrid[i] {
+			if char == "." {
+				if inside {
+					enclosed++
+				}
+			}
+			if char == "|" {
+				inside = !inside
+			}
+			if char == "-" {
+				continue
+			}
+			if char == "J" || char == "L" {
+				if partialPipe {
+					partialPipe = false
+					inside = !inside
+				} else {
+					partialPipe = true
+					inside = !inside
+				}
+			}
+			if char == "7" || char == "F" || char == "S" || char == "|" {
+				continue
+			}
+		}
 	}
-	visited[Position{x, y}] = true
 
-	directions := []Direction{{"North", 0, -1}, {"South", 0, 1}, {"East", 1, 0}, {"West", -1, 0}}
-	for _, d := range directions {
-		floodFill(grid, x+d.dx, y+d.dy, visited)
-	}
+	return enclosed
 }
 
 func contains(list []Position, item Position) bool {
