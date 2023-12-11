@@ -6,11 +6,16 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 )
 
 func main() {
+	timer := time.Now()
 	fmt.Println("Part 1 Solution:", part1("sample.txt"))
+	fmt.Println("Time taken:", time.Since(timer))
+	timer = time.Now()
 	fmt.Println("Part 2 Solution:", part2("input.txt"))
+	fmt.Println("Time taken:", time.Since(timer))
 }
 
 func part2(filename string) int {
@@ -19,26 +24,26 @@ func part2(filename string) int {
 	r, c := findEmptyRowsAndCols(grid)
 	// fmt.Println(len(grid[0]), len(grid), grid)
 
-	for i, _ := range grid[0] {
-		if contains(c, i) {
-			fmt.Print("V")
-		} else {
-			fmt.Print(" ")
-		}
-	}
-	fmt.Println()
+	// for i, _ := range grid[0] {
+	// 	if contains(c, i) {
+	// 		fmt.Print("V")
+	// 	} else {
+	// 		fmt.Print(" ")
+	// 	}
+	// }
+	// fmt.Println()
 
-	for i, row := range grid {
-		for _, pos := range row {
-			fmt.Print(pos.t)
-		}
-		if contains(r, i) {
-			fmt.Print("<")
-		} else {
-			fmt.Print(" ")
-		}
-		fmt.Println()
-	}
+	// for i, row := range grid {
+	// 	for _, pos := range row {
+	// 		fmt.Print(pos.t)
+	// 	}
+	// 	if contains(r, i) {
+	// 		fmt.Print("<")
+	// 	} else {
+	// 		fmt.Print(" ")
+	// 	}
+	// 	fmt.Println()
+	// }
 
 	var galaxyLocations []Position
 	galaxyNum := 0
@@ -67,7 +72,7 @@ func part2(filename string) int {
 		}
 	}
 
-	fmt.Println(distances)
+	// fmt.Println(distances)
 	sum := 0
 	for _, d := range distances {
 		sum += d
@@ -94,7 +99,7 @@ func bigDistance(a, b Position, r, c []int, factor int) int {
 
 	d := distance(a, b)
 
-	fmt.Println(a, b, emptyRowsCrossed, emptyColsCrossed, "d:", d, "factor:", factor)
+	// fmt.Println(a, b, emptyRowsCrossed, emptyColsCrossed, "d:", d, "factor:", factor)
 	if emptyRowsCrossed == 0 && emptyColsCrossed == 0 {
 		return d
 	}
@@ -110,12 +115,12 @@ func part1(filename string) int {
 	grid, _, _ = expandGrid(grid)
 	// fmt.Println(len(grid[0]), len(grid), grid)
 
-	for _, row := range grid {
-		for _, pos := range row {
-			fmt.Print(pos.t)
-		}
-		fmt.Println()
-	}
+	// for _, row := range grid {
+	// 	for _, pos := range row {
+	// 		fmt.Print(pos.t)
+	// 	}
+	// 	fmt.Println()
+	// }
 
 	var galaxyLocations []Position
 	galaxyNum := 0
@@ -206,7 +211,7 @@ func findEmptyRowsAndCols(grid Grid) ([]int, []int) {
 		}
 	}
 
-	fmt.Println(emptyRows, emptyCols)
+	// fmt.Println(emptyRows, emptyCols)
 
 	return emptyRows, emptyCols
 }
@@ -239,7 +244,7 @@ func expandGrid(grid Grid) (Grid, []int, []int) {
 		}
 	}
 
-	fmt.Println(emptyRows, emptyCols)
+	// fmt.Println(emptyRows, emptyCols)
 
 	for i := 0; i < len(grid); i++ {
 		// insert a "." into each row at the emptyCols indices
