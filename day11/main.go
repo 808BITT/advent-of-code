@@ -10,14 +10,105 @@ import (
 
 func main() {
 	fmt.Println("Part 1 Solution:", part1("sample.txt"))
-	// fmt.Println("Part 2 Solution:", part2("sample.txt"))
+	fmt.Println("Part 2 Solution:", part2("input.txt"))
+}
+
+func part2(filename string) int {
+	grid := generateGrid(filename)
+	// fmt.Println(len(grid[0]), len(grid), grid)
+	r, c := findEmptyRowsAndCols(grid)
+	// fmt.Println(len(grid[0]), len(grid), grid)
+
+	for i, _ := range grid[0] {
+		if contains(c, i) {
+			fmt.Print("V")
+		} else {
+			fmt.Print(" ")
+		}
+	}
+	fmt.Println()
+
+	for i, row := range grid {
+		for _, pos := range row {
+			fmt.Print(pos.t)
+		}
+		if contains(r, i) {
+			fmt.Print("<")
+		} else {
+			fmt.Print(" ")
+		}
+		fmt.Println()
+	}
+
+	var galaxyLocations []Position
+	galaxyNum := 0
+	for i, row := range grid {
+		for j, pos := range row {
+			if pos.t == "#" {
+				galaxyNum++
+				galaxyLocations = append(galaxyLocations, Position{itoa(galaxyNum), j, i})
+			}
+		}
+	}
+
+	// fmt.Println(galaxyLocations)
+
+	//calculate the distance between each pair of galaxy locations and store in a map
+	//find the sum of the distances for each location
+
+	var distances []int
+	for i := 0; i < len(galaxyLocations); i++ {
+		for j := i + 1; j < len(galaxyLocations); j++ {
+			// d := distance(galaxyLocations[i], galaxyLocations[j])
+			d := bigDistance(galaxyLocations[i], galaxyLocations[j], r, c, 1000000)
+
+			// fmt.Println(galaxyLocations[i], galaxyLocations[j], d)
+			distances = append(distances, d)
+		}
+	}
+
+	fmt.Println(distances)
+	sum := 0
+	for _, d := range distances {
+		sum += d
+	}
+
+	return sum
+}
+
+func bigDistance(a, b Position, r, c []int, factor int) int {
+	emptyRowsCrossed := 0
+	emptyColsCrossed := 0
+
+	for _, row := range r {
+		if (row > a.y && row < b.y) || (row > b.y && row < a.y) {
+			emptyRowsCrossed++
+		}
+	}
+
+	for _, col := range c {
+		if (col > a.x && col < b.x) || (col > b.x && col < a.x) {
+			emptyColsCrossed++
+		}
+	}
+
+	d := distance(a, b)
+
+	fmt.Println(a, b, emptyRowsCrossed, emptyColsCrossed, "d:", d, "factor:", factor)
+	if emptyRowsCrossed == 0 && emptyColsCrossed == 0 {
+		return d
+	}
+
+	baseDistance := distance(a, b) // Regular Manhattan distance
+	return baseDistance + (emptyRowsCrossed+emptyColsCrossed)*(factor-1)
+
 }
 
 func part1(filename string) int {
 	grid := generateGrid(filename)
-	fmt.Println(len(grid[0]), len(grid), grid)
-	grid = expandGrid(grid)
-	fmt.Println(len(grid[0]), len(grid), grid)
+	// fmt.Println(len(grid[0]), len(grid), grid)
+	grid, _, _ = expandGrid(grid)
+	// fmt.Println(len(grid[0]), len(grid), grid)
 
 	for _, row := range grid {
 		for _, pos := range row {
@@ -37,7 +128,7 @@ func part1(filename string) int {
 		}
 	}
 
-	fmt.Println(galaxyLocations)
+	// fmt.Println(galaxyLocations)
 
 	//calculate the distance between each pair of galaxy locations and store in a map
 	//find the sum of the distances for each location
@@ -46,12 +137,12 @@ func part1(filename string) int {
 	for i := 0; i < len(galaxyLocations); i++ {
 		for j := i + 1; j < len(galaxyLocations); j++ {
 			d := distance(galaxyLocations[i], galaxyLocations[j])
-			fmt.Println(galaxyLocations[i], galaxyLocations[j], d)
+			// fmt.Println(galaxyLocations[i], galaxyLocations[j], d)
 			distances = append(distances, d)
 		}
 	}
 
-	fmt.Println(distances)
+	// fmt.Println(distances)
 	sum := 0
 	for _, d := range distances {
 		sum += d
@@ -87,7 +178,40 @@ func generateGrid(filename string) Grid {
 	return grid
 }
 
-func expandGrid(grid Grid) Grid {
+func findEmptyRowsAndCols(grid Grid) ([]int, []int) {
+	emptyRows := []int{}
+	emptyCols := []int{}
+
+	for i, row := range grid {
+		allEmpty := true
+		for _, pos := range row {
+			if pos.t != "." {
+				allEmpty = false
+			}
+		}
+		if allEmpty {
+			emptyRows = append(emptyRows, i)
+		}
+	}
+
+	for i, _ := range grid[0] {
+		allEmpty := true
+		for _, pos := range grid {
+			if pos[i].t != "." {
+				allEmpty = false
+			}
+		}
+		if allEmpty {
+			emptyCols = append(emptyCols, i)
+		}
+	}
+
+	fmt.Println(emptyRows, emptyCols)
+
+	return emptyRows, emptyCols
+}
+
+func expandGrid(grid Grid) (Grid, []int, []int) {
 	emptyRows := []int{}
 	emptyCols := []int{}
 
@@ -146,7 +270,7 @@ func expandGrid(grid Grid) Grid {
 		}
 	}
 
-	return new
+	return new, emptyRows, emptyCols
 }
 
 func contains(list []int, item int) bool {
