@@ -17,28 +17,91 @@ func main() {
 	fmt.Println("Time: ", time.Since(timer))
 }
 
-func part2(filename string) int {
+func part2(filename string) float64 {
 	lines := readFile(filename)
-	sum := 0
+	var sum float64
 	for _, line := range lines {
-		val := evaluatePart1(line)
-		additional := part2Expand(line)
-		sum += val + additional
-		fmt.Println(val + additional)
-		fmt.Scanln()
+		val := evaluatePart2(line)
+		sum += val
+		fmt.Println(val)
+		// fmt.Scanln()
 	}
 	return sum
 }
 
-func part2Expand(line string) int {
-	modded := "?" + line
-	newValue := evaluatePart1(modded)
-	fmt.Println(modded, newValue)
+func evaluatePart2(line string) float64 {
+	split := strings.Split(line, " ")
+	arrangement := split[0]
+	var values []int
+	for _, val := range strings.Split(split[1], ",") {
+		values = append(values, atoi(val))
+	}
 
-	value := math.Pow(float64(newValue), 4)
-	// fmt.Println(value)
+	// var combosPerValue []float64
+	for i, val := range values {
+		leftValues := values[:i]
+		rightValues := values[i+1:]
+		fmt.Println(arrangement, values, val, "Left:", leftValues, "Right:", rightValues)
+		subArrangement := arrangement[sum(leftValues) : sum(leftValues)+val+1]
+		fmt.Println(subArrangement)
+		fmt.Scanln()
+	}
 
-	return int(value)
+	return float64(0)
+}
+
+func sum(values []int) int {
+	out := 0
+	for _, val := range values {
+		out += val
+	}
+	return out
+}
+
+func reverseArrangement(arrangement string) string {
+	out := ""
+	for i := len(arrangement) - 1; i >= 0; i-- {
+		out += string(arrangement[i])
+	}
+	return out
+}
+
+func reverseValues(values []string) string {
+	out := ""
+	for i := len(values) - 1; i >= 0; i-- {
+		out += values[i] + ","
+	}
+	return out[:len(out)-1]
+}
+
+func atoi(str string) int {
+	out := 0
+	for _, char := range str {
+		out = out*10 + int(char-'0')
+	}
+	return out
+}
+
+func part2Expand(line string) float64 {
+	original := evaluatePart1(line)
+	split := strings.Split(line, " ")
+	arrangement := split[0]
+
+	var builder strings.Builder
+	builder.WriteString(arrangement)
+	builder.WriteString("?")
+	builder.WriteString(arrangement)
+	builder.WriteString(" ")
+	builder.WriteString(split[1])
+	builder.WriteString(",")
+	builder.WriteString(split[1])
+
+	modded := builder.String()
+	doubled := evaluatePart1(modded)
+	factor := float64(doubled) / float64(original)
+	out := float64(original) * math.Pow(factor, 4)
+
+	return out
 }
 
 func part1(filename string) int {
@@ -47,7 +110,7 @@ func part1(filename string) int {
 	for _, line := range lines {
 		val := evaluatePart1(line)
 		sum += val
-		// fmt.Println(val)
+		fmt.Println(val)
 	}
 	return sum
 }
@@ -70,13 +133,16 @@ func evaluatePart1(line string) int {
 
 	//find all combinations of . and # for each ? in arrangement
 	combinations := math.Pow(2, float64(len(unknowns)))
-	// fmt.Println(combinations)
+	fmt.Println("Combinations:", combinations)
 
 	// return int(combinations)
 
 	count := 0
 	//for each combination, replace ? with . and # and evaluate
 	for i := 0; i < int(combinations); i++ {
+		if i%1000000 == 0 && i != 0 {
+			fmt.Println(i)
+		}
 		//convert i to binary
 		binary := fmt.Sprintf("%b", i)
 		// fmt.Println(binary)
@@ -105,13 +171,7 @@ func evaluatePart1(line string) int {
 }
 
 func isValid(arrangement string, values []string) bool {
-	// values corresponds to the number of contiguous #s in arrangement
-	// check that the number of contiguous #s in arrangement matches the values
-	// if so, return true
-	// else, return false
-
 	split := strings.Split(arrangement, ".")
-	// fmt.Println(split)
 
 	contiguousValues := []int{}
 	for _, str := range split {
