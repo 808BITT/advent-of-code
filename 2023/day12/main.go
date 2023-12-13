@@ -17,91 +17,95 @@ func main() {
 	fmt.Println("Time: ", time.Since(timer))
 }
 
-func part2(filename string) float64 {
+func part2(filename string) int {
 	lines := readFile(filename)
-	var sum float64
+	var sum int
 	for _, line := range lines {
 		val := evaluatePart2(line)
 		sum += val
-		fmt.Println(val)
-		// fmt.Scanln()
+		fmt.Scanln()
 	}
 	return sum
 }
 
-func evaluatePart2(line string) float64 {
+func evaluatePart2(line string) int {
+	// Parse the line
 	split := strings.Split(line, " ")
-	arrangement := split[0]
-	var values []int
+	original := split[0]
+	groups := []int{}
 	for _, val := range strings.Split(split[1], ",") {
-		values = append(values, atoi(val))
+		groups = append(groups, atoi(val))
 	}
 
-	// var combosPerValue []float64
-	for i, val := range values {
-		leftValues := values[:i]
-		rightValues := values[i+1:]
-		fmt.Println(arrangement, values, val, "Left:", leftValues, "Right:", rightValues)
-		subArrangement := arrangement[sum(leftValues) : sum(leftValues)+val+1]
-		fmt.Println(subArrangement)
-		fmt.Scanln()
-	}
-
-	return float64(0)
-}
-
-func sum(values []int) int {
 	out := 0
-	for _, val := range values {
-		out += val
+
+	valid := make(ArrangementMemo, len(groups))
+
+	index := 0
+	count := 0
+	for {
+		fmt.Println("index:", index, "count:", count)
+		if index == len(original)-1 {
+			break
+		}
+		if original[index] == '?' || original[index] == '#' {
+			count++
+		}
+		if count == groups[0] && original[index+1] != '#' && original[index+1] != '?' {
+			break
+		}
+		index++
 	}
+
+	valid[0] = findArrangements(original, groups[0], index+1)
+	fmt.Println(valid[0])
+
+	fmt.Println(original, groups, "->", out)
 	return out
 }
 
-func reverseArrangement(arrangement string) string {
-	out := ""
-	for i := len(arrangement) - 1; i >= 0; i-- {
-		out += string(arrangement[i])
+func findArrangements(arrangement string, groupSize int, startIndex int) ValidArrangements {
+	fmt.Println("findArrangements", arrangement, groupSize, startIndex)
+
+	subString := arrangement[:startIndex]
+	fmt.Println(subString)
+
+	indexesOfUnknowns := []int{}
+	for i, char := range subString {
+		if char == '?' {
+			indexesOfUnknowns = append(indexesOfUnknowns, i)
+		}
 	}
-	return out
-}
+	// fmt.Println(indexesOfUnknowns)
 
-func reverseValues(values []string) string {
-	out := ""
-	for i := len(values) - 1; i >= 0; i-- {
-		out += values[i] + ","
+	var arrangements ValidArrangements
+	for i := 0; i < int(math.Pow(2, float64(len(indexesOfUnknowns)))); i++ {
+		binary := fmt.Sprintf("%b", i)
+		for len(binary) < len(indexesOfUnknowns) {
+			binary = "0" + binary
+		}
+		// fmt.Println(binary)
+
+		arrangement := subString
+		for j, index := range indexesOfUnknowns {
+			if binary[j] == '0' {
+				arrangement = arrangement[:index] + "." + arrangement[index+1:]
+			} else {
+				arrangement = arrangement[:index] + "#" + arrangement[index+1:]
+			}
+		}
+		fmt.Println(arrangement)
+
+		if isValid(arrangement, []string{fmt.Sprintf("%d", groupSize)}) {
+			// trim trailing .'s from arrangement
+			for arrangement[len(arrangement)-1] == '.' {
+				arrangement = arrangement[:len(arrangement)-1]
+			}
+			arrangements = append(arrangements, arrangement+".")
+		}
 	}
-	return out[:len(out)-1]
-}
 
-func atoi(str string) int {
-	out := 0
-	for _, char := range str {
-		out = out*10 + int(char-'0')
-	}
-	return out
-}
-
-func part2Expand(line string) float64 {
-	original := evaluatePart1(line)
-	split := strings.Split(line, " ")
-	arrangement := split[0]
-
-	var builder strings.Builder
-	builder.WriteString(arrangement)
-	builder.WriteString("?")
-	builder.WriteString(arrangement)
-	builder.WriteString(" ")
-	builder.WriteString(split[1])
-	builder.WriteString(",")
-	builder.WriteString(split[1])
-
-	modded := builder.String()
-	doubled := evaluatePart1(modded)
-	factor := float64(doubled) / float64(original)
-	out := float64(original) * math.Pow(factor, 4)
-
-	return out
+	return arrangements
 }
 
 func part1(filename string) int {
@@ -210,3 +214,15 @@ func readFile(filename string) []string {
 
 	return lines
 }
+
+func atoi(s string) int {
+	var num int
+	for _, digit := range s {
+		num = num*10 + int(digit-'0')
+	}
+	return num
+}
+
+type ArrangementMemo map[int]ValidArrangements
+
+type ValidArrangements []string
