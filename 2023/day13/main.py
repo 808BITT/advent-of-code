@@ -1,17 +1,60 @@
 
+from hmac import new
 from itertools import count
 import time
 
 def main():
     print('-'*20+'\n')
     timer = time.perf_counter()
-    print("Part 1:", part1("input.txt"))
+    print("Part 1:", part1("2023/day13/sample.txt"))
     print("Time: {0:.3f}".format(time.perf_counter() - timer))
-    # timer = time.perf_counter()
-    # print("Part 2:", part2("sample.txt"))
-    # print("Time: {0:.3f}".format(time.perf_counter() - timer))
+    timer = time.perf_counter()
+    print("Part 2:", part2("2023/day13/sample.txt"))
+    print("Time: {0:.3f}".format(time.perf_counter() - timer))
 
+def part2(file):
+    pictures = parse_file(file)
 
+    count = 0
+    sum = 0
+    for picture in pictures:
+        temp = picture.copy()
+        found = False
+        for i in range(len(temp)):
+            for j in range(len(temp[0])):
+                print(f"Checking {i}, {j} - {temp[i][j]}")
+                if temp[i][j] == "#":
+                    new = temp[i][:j] + "." + temp[i][j+1:]
+                else:
+                    new = temp[i][:j] + "#" + temp[i][j+1:]
+                temp[i] = new
+                show(temp)
+                vertical, horizontal = find_symmetry(temp)
+                if vertical is not None:
+                    print("VERTICAL @", vertical, '\n')
+                    print('-'*20+'\n')
+                    sum += vertical+1
+                    count += 1
+                    found = True
+                if horizontal is not None:
+                    print("HORIZONTAL @", horizontal, '\n')
+                    print('-'*20+'\n')
+                    sum += (horizontal+1) * 100
+                    count += 1
+                    found = True
+
+                if found:
+                    break
+            if found:
+                break
+        if not found:
+            print("No symmetry found")
+        print(f'Found {count}/{len(pictures)} symmetries - Sum: {sum}\n')
+        input()
+
+    print(f'Found {count}/{len(pictures)} symmetries\n')
+
+    return sum
 
 def part1(file):
     pictures = parse_file(file)
