@@ -26,8 +26,8 @@ def part2(file):
         print("Cycle:", i, "of", CYCLES, "Current Weight:", sum_weight(rock_map))
         memo[i] = to_rock_string(rock_map)
 
-        # show(rock_map)
-        # input()
+        show(rock_map)
+        input()
 
         # test = from_rock_string(memo[i])
         # for i in range(len(test)-1):
@@ -52,9 +52,9 @@ def part2(file):
 
             index += 1
 
-        # print("NORTH TILT DONE")
-        # show(rock_map)
-        # input()
+        print("NORTH TILT")
+        show(rock_map)
+        input()
 
         # WEST TILT
         index = 1
@@ -76,8 +76,8 @@ def part2(file):
             index += 1
 
         # print("WEST TILT DONE")
-        # show(rock_map)
-        # input()
+        show(rock_map)
+        input()
 
         # SOUTH TILT
         index = 1
@@ -99,8 +99,8 @@ def part2(file):
             index += 1
 
         # print("SOUTH TILT DONE")
-        # show(rock_map)
-        # input()
+        show(rock_map)
+        input()
 
         # EAST TILT
         index = 1
@@ -122,8 +122,8 @@ def part2(file):
             index += 1
 
         # print("EAST TILT DONE")
-        # show(rock_map)
-        # input()
+        show(rock_map)
+        input()
 
         if to_rock_string(rock_map) in memo.values():
             # print("FOUND A LOOP AT CYCLE:", i+1, "WEIGHT:", sum_weight(rock_map))
@@ -147,8 +147,8 @@ def part2(file):
                 
             return sum_weight(cache)
 
-        # show(rock_map)
-        # input()
+        show(rock_map)
+        input()
 
     return sum_weight(rock_map)
 
