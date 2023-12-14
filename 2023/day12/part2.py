@@ -1,5 +1,8 @@
+from operator import index
 from re import split
 import time
+
+from click import group
 
 def main():
     timer = time.perf_counter()
@@ -21,30 +24,32 @@ def part2(file):
     return sum
 
 def calculate(line: str) -> int:
+    print(line)
     split = line.split(' ')
     arrangement = split[0]
     values = [int(v) for v in split[1].split(',')]
     
+
+    index = 0
     results = []
+    for group in values:
+        count = 0
+        while True:
+            if count == group:
+                results.append(arrangement[index-group+1:index+1])
+                break
+            if arrangement[index] == '?' or arrangement[index] == '#':
+                count += 1
+            index += 1
+        
+            
 
-    # groups end with .
-    # groups start with a #
-    # groups are the length and in order of the values
-    # groups are separated by a 
+        for r in results:
+            print(r)
 
-    buffer = arrangement[0]
-    print(buffer)
 
     return len(results)
 
-
-def countBroken(arrangement: str) -> int:
-    count = 0
-    for i in range(len(arrangement)):
-        if arrangement[i] == '#' or arrangement[i] == '?':
-            count += 1
-    
-    return 0
 
 if __name__ == '__main__':
     main()
