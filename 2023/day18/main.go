@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -219,8 +220,123 @@ func part1(data []string) int {
 }
 
 func part2(data []string) int {
+	curX, curY, minX, maxX, minY, maxY := readData(data)
+
+	CHUNK_SIZE := 100000
+
+	horizontalChunks := (maxX-minX)/CHUNK_SIZE + 1
+	verticalChunks := (maxY-minY)/CHUNK_SIZE + 1
+
+	grid := make([][]Chunk, verticalChunks)
+	for i := range grid {
+		grid[i] = make([]Chunk, horizontalChunks)
+	}
+
+	fmt.Println("Starting Chunk: ", curY/CHUNK_SIZE, curX/CHUNK_SIZE, "(", curX%CHUNK_SIZE, ",", curY%CHUNK_SIZE, ")")
+	grid[curY/CHUNK_SIZE][curX/CHUNK_SIZE].Visited = true
+	grid[curY/CHUNK_SIZE][curX/CHUNK_SIZE].Entry = Coord{curX % CHUNK_SIZE, curY % CHUNK_SIZE}
+	fmt.Println("Entry:", grid[curY/CHUNK_SIZE][curX/CHUNK_SIZE].Entry)
+	fmt.Println("------------------")
+
 	sum := 0
+	for _, line := range data {
+		fmt.Println("Current Y, X:", curY, curX)
+		grid[curY/CHUNK_SIZE][curX/CHUNK_SIZE].Visited = true
+
+		rawHex := regexp.MustCompile(`\(#([0-9a-f]{6})\)`).FindStringSubmatch(line)[1]
+		distance, _ := atoh(rawHex[0:5])
+		direction := Direction(rawHex[5])
+
+		switch direction {
+		case Right:
+			fmt.Println("Right", distance)
+			curChunkX := curX / CHUNK_SIZE
+			curChunkY := curY / CHUNK_SIZE
+			if curX+distance > (curChunkX+1)*CHUNK_SIZE {
+				fmt.Println("Exiting chunk to the right")
+				grid[curChunkY][curChunkX].Exit = Coord{CHUNK_SIZE - 1, curY % CHUNK_SIZE}
+
+				for i := curChunkX + 1; i < (curX+distance)/CHUNK_SIZE; i++ {
+					grid[curChunkY][i].Visited = true
+					grid[curChunkY][i].Entry = Coord{0, curY % CHUNK_SIZE}
+					grid[curChunkY][i].Exit = Coord{CHUNK_SIZE - 1, curY % CHUNK_SIZE}
+					fmt.Println("Passed through chunk", curChunkY, i)
+				}
+
+				curX += distance
+				newChunkX := curX / CHUNK_SIZE
+				grid[curChunkY][newChunkX].Visited = true
+				grid[curChunkY][newChunkX].Entry = Coord{0, curY % CHUNK_SIZE}
+				grid[curChunkY][newChunkX].Midpoints = append(grid[curChunkY][newChunkX].Midpoints, Coord{curX % CHUNK_SIZE, curY % CHUNK_SIZE})
+				fmt.Println("Entry:", grid[curChunkY][newChunkX].Entry)
+				fmt.Println("Midpoint:", grid[curChunkY][newChunkX].Midpoints)
+			} else {
+				curX += distance
+				grid[curChunkY][curChunkX].Midpoints = append(grid[curChunkY][curChunkX].Midpoints, Coord{curX % CHUNK_SIZE, curY % CHUNK_SIZE})
+				fmt.Println("Stayed in chunk", curChunkY, curChunkX)
+				fmt.Println("Midpoint:", grid[curChunkY][curChunkX].Midpoints)
+			}
+
+		case Left:
+			fmt.Println("Left", distance)
+		case Up:
+			fmt.Println("Up", distance)
+		case Down:
+			fmt.Println("Down", distance)
+		}
+		fmt.Println()
+	}
+
 	return sum
+}
+
+func readData(data []string) (int, int, int, int, int, int) {
+	var curX, curY, minX, maxX, minY, maxY int
+	for _, line := range data {
+		rawHex := regexp.MustCompile(`\(#([0-9a-f]{6})\)`).FindStringSubmatch(line)[1]
+		distance, _ := atoh(rawHex[0:5])
+		direction := rawHex[5:6]
+
+		switch direction {
+		case "0":
+			curX += distance
+			if curX > maxX {
+				maxX = curX
+			}
+		case "1":
+			curY += distance
+			if curY > maxY {
+				maxY = curY
+			}
+		case "2":
+			curX -= distance
+			if curX < minX {
+				minX = curX
+			}
+		case "3":
+			curY -= distance
+			if curY < minY {
+				minY = curY
+			}
+		default:
+			fmt.Println("Unknown direction:", direction)
+			return 0, 0, 0, 0, 0, 0
+		}
+	}
+	curX, curY = 0, 0
+
+	if minX < 0 {
+		maxX += minX*-1 + 1
+		curX += minX*-1 + 1
+		minX = 0
+	}
+	if minY < 0 {
+		maxY += minY*-1 + 1
+		curY += minY*-1 + 1
+		minY = 0
+	}
+
+	return curX, curY, minX, maxX, minY, maxY
 }
 
 func atoh(s string) (int, error) {
@@ -252,3 +368,24 @@ func show(grid [][]int) {
 	}
 	fmt.Println()
 }
+
+type Chunk struct {
+	Visited   bool
+	Entry     Coord
+	Exit      Coord
+	Midpoints []Coord
+	Direction Direction
+}
+
+type Coord struct {
+	X, Y int
+}
+
+type Direction string
+
+const (
+	Right Direction = "0"
+	Down  Direction = "1"
+	Left  Direction = "2"
+	Up    Direction = "3"
+)
