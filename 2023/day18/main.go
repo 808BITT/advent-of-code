@@ -10,13 +10,16 @@ import (
 )
 
 func main() {
-	data, err := readInput("input.txt")
+	data, err := readInput("sample.txt")
 	if err {
 		return
 	}
 
 	timer := time.Now()
 	fmt.Println("Part 1:", part1(data))
+	fmt.Println("Time taken:", time.Since(timer))
+	timer = time.Now()
+	fmt.Println("Part 2:", part2(data))
 	fmt.Println("Time taken:", time.Since(timer))
 }
 
@@ -49,31 +52,31 @@ func part1(data []string) int {
 		split := strings.Split(line, " ")
 		dir := split[0]
 		dist, err := strconv.Atoi(split[1])
-		fmt.Println(dir, dist, minX, maxX, minY, maxY)
 		if err != nil {
 			fmt.Println("Error converting string to int:", err)
 			return 0
 		}
+
 		switch dir {
 		case "R":
-			curX += dist + 1
+			curX += dist
 			if curX > maxX {
-				maxX = curX + 1
+				maxX = curX
 			}
 		case "L":
 			curX -= dist
 			if curX < minX {
-				minX = curX - 1
+				minX = curX
 			}
 		case "U":
 			curY -= dist
 			if curY < minY {
-				minY = curY - 1
+				minY = curY
 			}
 		case "D":
-			curY += dist + 1
+			curY += dist
 			if curY > maxY {
-				maxY = curY + 1
+				maxY = curY
 			}
 		default:
 			fmt.Println("Unknown direction:", dir)
@@ -95,12 +98,12 @@ func part1(data []string) int {
 	}
 
 	// create grid
-	grid := make([][]int, maxY)
+	grid := make([][]int, maxY+1)
 	for i := range grid {
-		grid[i] = make([]int, maxX)
+		grid[i] = make([]int, maxX+1)
 	}
 
-	fmt.Println(minX, maxX, minY, maxY)
+	// fmt.Println(minX, maxX, minY, maxY)
 
 	// draw path
 	for _, line := range data {
@@ -112,7 +115,7 @@ func part1(data []string) int {
 			return 0
 		}
 
-		fmt.Println(dir, dist, curX, curY)
+		// fmt.Println(dir, dist, curX, curY)
 
 		switch dir {
 		case "R":
@@ -128,28 +131,53 @@ func part1(data []string) int {
 		case "U":
 			for i := 0; i < dist; i++ {
 				curY--
-				grid[curY][curX] = 1
+				grid[curY+1][curX] = -1
+				grid[curY][curX] = -1
 			}
 		case "D":
 			for i := 0; i < dist; i++ {
 				curY++
-				grid[curY][curX] = 1
+				grid[curY-1][curX] = 2
+				grid[curY][curX] = 2
 			}
 		default:
 			fmt.Println("Unknown direction:", dir)
 			return 0
 		}
 	}
-	show(grid)
+	// show(grid)
+	// write grid to file named "grid.txt"
+	file, err := os.Create("grid.txt")
+	if err != nil {
+		fmt.Println("Error creating file:", err)
+		return 0
+	}
+	for _, line := range grid {
+		for _, val := range line {
+			if val == 0 {
+				file.WriteString(".")
+			} else if val == -1 {
+				file.WriteString("^")
+			} else if val == 2 {
+				file.WriteString("v")
+			} else {
+				file.WriteString("#")
+			}
+		}
+		file.WriteString("\n")
+	}
+	file.Close()
 
 	// fill in the "pool"
 	for y := 0; y < len(grid)-1; y++ {
 		inside := false
 		for x := 0; x < len(grid[y])-1; x++ {
-			if grid[y][x] == 1 {
-				if grid[y][x+1] == 0 {
-					inside = !inside
-				}
+			if grid[y][x] == -1 {
+				inside = true
+			}
+			if grid[y][x] == 2 {
+				inside = false
+				continue
 			}
 			if inside {
 				grid[y][x] = 1
@@ -157,18 +185,58 @@ func part1(data []string) int {
 		}
 	}
 
-	show(grid)
+	file, err = os.Create("filled.txt")
+	if err != nil {
+		fmt.Println("Error creating file:", err)
+		return 0
+	}
+	for _, line := range grid {
+		for _, val := range line {
+			if val == 0 {
+				file.WriteString(".")
+			} else {
+				file.WriteString("#")
+			}
+		}
+		file.WriteString("\n")
+	}
+	file.Close()
+
+	// show(grid)
 
 	// calculate sum of grid
 	sum := 0
 	for y := range grid {
 		for x := range grid[y] {
-			sum += grid[y][x]
+			if grid[y][x] != 0 {
+				sum++
+			}
 		}
 	}
 
 	// return
 	return sum
+}
+
+func part2(data []string) int {
+	sum := 0
+	return sum
+}
+
+func atoh(s string) (int, error) {
+	var res int
+	for _, c := range s {
+		res *= 16
+		switch {
+		case '0' <= c && c <= '9':
+			res += int(c - '0')
+		case 'a' <= c && c <= 'f':
+			res += int(c - 'a' + 10)
+		default:
+			return 0, fmt.Errorf("invalid hex digit: %q", c)
+		}
+	}
+	return res, nil
 }
 
 func show(grid [][]int) {
